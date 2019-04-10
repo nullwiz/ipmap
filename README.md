@@ -1,6 +1,7 @@
 ## ipmap
 This python program reads traceroute from stdin (or tracert on windows) and maps it to a point in the Basemap matplotlib instance and animates it using the FuncAnimator.  
 ## installation
+get conda, matplotlib 
 
 ## usage
 <code>traceroute -I google.com | python ipmap.py</code>
