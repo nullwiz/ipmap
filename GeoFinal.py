@@ -12,6 +12,7 @@ import conda
 import fileinput
 import ipaddress
 import matplotlib.animation as animation
+import subprocess 
 
 ##################################################
 #Hack to fix missing PROJ4 env var
@@ -27,7 +28,25 @@ from mpl_toolkits.basemap import Basemap
 
 #Emulate tracert stin 
 def CallTraceRoute():
+    traceroute = 'traceroute'
     ip_list=[]
+    subprocess.call(['traceroute','google.com'],shell=true,stdout=subprocess.PIPE)
+    stdout = process.communicate()[0]
+    while True:
+        output = process.stdout.readline()
+        for line in output:
+            line = line.translate(str.maketrans('','','()'))
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                try:
+                    piaddress.ip_address
+    rc = process.poll()
+    
+    
+    
+    
+    
     for line in fileinput.input():
         #Si hay ips entre (), saquemoslas antes de verificar si son validas
         line = line.translate(str.maketrans('','','()'))
