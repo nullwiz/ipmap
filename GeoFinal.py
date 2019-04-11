@@ -19,7 +19,8 @@ import subprocess
 
 conda_file_dir = conda.__file__
 conda_dir = conda_file_dir.split('lib')[0]
-proj_lib = os.path.join(os.path.join(conda_dir, 'share'), 'proj')
+print (conda_dir)
+proj_lib = os.path.join(os.path.join(conda_dir, 'Library'), 'share')
 os.environ["PROJ_LIB"] = proj_lib
 
 
@@ -28,42 +29,33 @@ from mpl_toolkits.basemap import Basemap
 
 #Emulate tracert stin 
 def CallTraceRoute():
-    traceroute = 'traceroute'
+    #traceroute = 'tracert'
     ip_list=[]
-    subprocess.call(['traceroute','google.com'],shell=true,stdout=subprocess.PIPE)
-    stdout = process.communicate()[0]
+    process = subprocess.Popen(['tracert','google.com'],shell=True,stdout=subprocess.PIPE)
+    
     while True:
-        output = process.stdout.readline()
-        for line in output:
-            line = line.translate(str.maketrans('','','()'))
-            if output == '' and process.poll() is not None:
-                break
-            if output:
+        line = process.stdout.readline().decode('utf-8')
+        if line == '' and process.poll() is not None:
+            break
+        if line:
+            print('current line is ' + line.strip())
+            line=line.strip()
+            line = line.translate(str.maketrans('','','[]'))
+            sline = line.split( )
+            for line in sline:
                 try:
-                    piaddress.ip_address
-    rc = process.poll()
-    
-    
-    
-    
-    
-    for line in fileinput.input():
-        #Si hay ips entre (), saquemoslas antes de verificar si son validas
-        line = line.translate(str.maketrans('','','()'))
-        sLine = line.split( )
-        for i in sLine:
-            try:
-                ipaddress.ip_address(i)
-                # legal
-                if i not in ip_list:
-                    ip_list.append(i)
-            except ValueError:
-                pass
-    #dont parse first local hop
+                    ipaddress.ip_address(line)
+                    # legal
+                    if line not in ip_list:
+                        ip_list.append(line)
+                except ValueError:
+                    pass
+                    
+        rc = process.poll()
+    print('iplist is : ' + str(ip_list))
     return ip_list[1:]
-
-
-
+            
+    
 ###################################################
 def ParseTraceRoute():
     ip_list=[]
@@ -108,7 +100,7 @@ x,y = m(0,0)
 point = m.plot(x,y,'ro',markersize=5)[0]
 
 ip_list = []
-ip_list=ParseTraceRoute()
+ip_list=CallTraceRoute()
 json_list = []
 coord_list = []
 
@@ -134,7 +126,7 @@ print('Requests for latitude and longitude to all of the ips responded with:'  +
 
 coord_iter = iter(coord_list)
 #Call Animator
-anim = animation.FuncAnimation(plt.gcf(),animate,init_func=init,frames=20,repeat=True,interval=1000,blit=True)
+#anim = animation.FuncAnimation(plt.gcf(),animate,init_func=init,frames=20,repeat=True,interval=1000,blit=True)
 
-plt.show()
+#plt.show()
 
