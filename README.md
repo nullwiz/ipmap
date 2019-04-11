@@ -1,8 +1,8 @@
 ## ipmap
-This python program reads traceroute from stdin (or tracert on windows) and maps it to a point in the Basemap matplotlib instance and animates it using the FuncAnimator.  
-## installation
-get conda, matplotlib 
+Feed me a domain and I will map each plot.
 
+## installation
+get conda, matplotlib
 ## usage
 <code>traceroute -I google.com | python ipmap.py</code>
 ### possible fixes
@@ -15,4 +15,4 @@ get conda, matplotlib
       
        
 
-  [2] fix PROJ_LIB (proj4 enviroment issue-- the fix is to set the PATH in .bashrc, maybe?)
+  [2] fix PROJ_LIB (proj4 enviroment issue)
