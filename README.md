@@ -1,5 +1,5 @@
 ## ipmap
-Feed me a domain and I will map each plot.
+Feed me a domain and I will map each point in the map.
 
 ## installation
 get conda, matplotlib
@@ -16,3 +16,5 @@ get conda, matplotlib
        
 
   [2] fix PROJ_LIB (proj4 enviroment issue)
+  
+  [3] forget about FuncAnimator (its VERY buggy) and build every image. Otherwise, FuncAnimator always messes up the gif.
