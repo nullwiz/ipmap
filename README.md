@@ -2,7 +2,12 @@
 Feed me a domain and I will map each point in the map.
 
 ## installation
-get conda, matplotlib
+get conda, matplotlib and Basemap
+To install Basemap do:
+'''
+conda install basemap
+'''
+dont use conda-forge since it messes with your enviroment.
 ## usage
 <code>traceroute -I google.com | python ipmap.py</code>
 ### possible fixes
