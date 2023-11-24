@@ -1,121 +1,87 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Apr  8 18:44:14 2019
-
-@author: nullwiz & leculet
+Updated on: [Your update date]
+@author: [Your name]
 """
-import urllib.request
+
 import json
-import codecs
-import os
-import conda
-import fileinput
+import requests
 import ipaddress
-import matplotlib.animation as animation
-
-##################################################
-#Hack to fix missing PROJ4 env var
-
-conda_file_dir = conda.__file__
-conda_dir = conda_file_dir.split('lib')[0]
-proj_lib = os.path.join(os.path.join(conda_dir, 'share'), 'proj')
-os.environ["PROJ_LIB"] = proj_lib
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import argparse
 
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
-
-#Emulate tracert stin 
-def CallTraceRoute():
-    ip_list=[]
-    for line in fileinput.input():
-        #Si hay ips entre (), saquemoslas antes de verificar si son validas
-        line = line.translate(str.maketrans('','','()'))
-        sLine = line.split( )
-        for i in sLine:
-            try:
-                ipaddress.ip_address(i)
-                # legal
-                if i not in ip_list:
-                    ip_list.append(i)
-            except ValueError:
-                pass
-    #dont parse first local hop
-    return ip_list[1:]
+def fetch_ip_data(ip):
+    """
+    Fetch IP data from the API.
+    """
+    url = f"http://ip-api.com/json/{ip}?fields=country,city,lat,lon"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return json.loads(response.text)
+    except requests.RequestException as e:
+        print(f"Error fetching data for IP {ip}: {e}")
+        return None
 
 
-
-###################################################
-def ParseTraceRoute():
-    ip_list=[]
-    for line in fileinput.input():
-        #Si hay ips entre (), saquemoslas antes de verificar si son validas
-        line = line.translate(str.maketrans('','','()'))
-        sLine = line.split( )
-        for i in sLine:
-            try:
-                ipaddress.ip_address(i)
-                # legal
-                if i not in ip_list:
-                    ip_list.append(i)
-            except ValueError:
-                pass
-    #dont parse first local hop
-    return ip_list[1:]
-
-
-def init():
-    point.set_data([],[])
-    return point,
-
-def animate(i):
-    print('mapping..')
-    #update lons and lats
-    lats = next(coord_iter)
-    lons = next(coord_iter)
-    print('lats is: ' + str(lats) + '   '+'lons is : ' + str(lons))
-    x,y = m(lons,lats)
-    point.set_data(x,y)
-    return point,
-
-#Config Map
-m = Basemap(lat_0=0, lon_0=0, projection='moll',resolution='l')
-m.drawmapboundary(fill_color='lightblue')
-m.fillcontinents(color='tan',lake_color='lightblue')
-#m.drawcoastlines()
-m.shadedrelief()
-#Init and define first point
-x,y = m(0,0)
-point = m.plot(x,y,'ro',markersize=5)[0]
-
-ip_list = []
-ip_list=ParseTraceRoute()
-json_list = []
-coord_list = []
-
-#Read from STDIN
-[print('About to get coordinates for: ' + ip_list[i]) for i in range(0,len(ip_list))]
-
-for i in ip_list:
-                                                                    ##Change for + data
-    with urllib.request.urlopen('http://ip-api.com/json/'+str(i)+ '?fields=country,city,lat,lon') as f:
-            json_list.append(json.loads(f.read()))
+def parse_trace_route(file):
+    """
+    Parse trace route from a file.
+    """
+    ip_list = []
+    with open(file, "r") as f:
+        for line in f:
+            # Extract and validate IP addresses
+            line = line.translate(str.maketrans("", "", "()"))
+            for part in line.split():
+                try:
+                    ip = ipaddress.ip_address(part)
+                    if str(ip) not in ip_list:
+                        ip_list.append(str(ip))
+                except ValueError:
+                    continue
+    return ip_list[1:]  # Skip the first local hop
 
 
-#Append for our fav json
-for i in range(0,len(json_list)):
-    coord_list.append(float(json_list[i]['lat']))
+def main(trace_route_file):
+    ip_list = parse_trace_route(trace_route_file)
+    lat_list, lon_list = [], []
 
-    coord_list.append(float(json_list[i]['lon']))
+    for ip in ip_list:
+        data = fetch_ip_data(ip)
+        if data:
+            lat_list.append(data["lat"])
+            lon_list.append(data["lon"])
 
-#Print coordinates for debugging
-print('Requests for latitude and longitude to all of the ips responded with:'  +str(coord_list))
+    # Create a scatter geo map
+    fig = make_subplots(rows=1, cols=1, specs=[[{"type": "scattergeo"}]])
 
-#Lo mas crucial es hacer este iterador para que la variable que updatea el frame (animate) pueda leerlo de main y ir loopeando
+    fig.add_trace(
+        go.Scattergeo(
+            lon=lon_list,
+            lat=lat_list,
+            mode="markers+lines",
+            marker=dict(size=5, color="red"),
+        )
+    )
 
-coord_iter = iter(coord_list)
-#Call Animator
-anim = animation.FuncAnimation(plt.gcf(),animate,init_func=init,frames=20,repeat=True,interval=1000,blit=True)
+    fig.update_layout(
+        title="IP Trace Route Visualization",
+        geo=dict(projection_type="orthographic"),
+        showlegend=False,
+    )
 
-plt.show()
+    fig.show()
 
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="IP Trace Route Visualization."
+    )
+    parser.add_argument(
+        "trace_route_file", type=str, help="File containing trace route data."
+    )
+    args = parser.parse_args()
+    main(args.trace_route_file)
