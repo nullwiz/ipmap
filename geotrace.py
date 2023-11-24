@@ -5,23 +5,24 @@ Updated on: [Your update date]
 """
 
 import json
-import requests
+import asyncio
+import aiohttp
 import ipaddress
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import argparse
 
 
-def fetch_ip_data(ip):
+async def fetch_ip_data(session: aiohttp.ClientSession, ip):
     """
     Fetch IP data from the API.
     """
     url = f"http://ip-api.com/json/{ip}?fields=country,city,lat,lon"
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return json.loads(response.text)
-    except requests.RequestException as e:
+        async with session.get(url) as response:
+            response.raise_for_status()
+            return await response.json()
+    except aiohttp.ClientError as e:
         print(f"Error fetching data for IP {ip}: {e}")
         return None
 
@@ -45,15 +46,15 @@ def parse_trace_route(file):
     return ip_list[1:]  # Skip the first local hop
 
 
-def main(trace_route_file):
+async def main(trace_route_file):
     ip_list = parse_trace_route(trace_route_file)
-    lat_list, lon_list = [], []
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_ip_data(session, ip) for ip in ip_list]
+        results = await asyncio.gather(*tasks)
 
-    for ip in ip_list:
-        data = fetch_ip_data(ip)
-        if data:
-            lat_list.append(data["lat"])
-            lon_list.append(data["lon"])
+    valid_results = [result for result in results if result]
+    lat_list = [data["lat"] for data in valid_results]
+    lon_list = [data["lon"] for data in valid_results]
 
     # Create a scatter geo map
     fig = make_subplots(rows=1, cols=1, specs=[[{"type": "scattergeo"}]])
@@ -84,4 +85,4 @@ if __name__ == "__main__":
         "trace_route_file", type=str, help="File containing trace route data."
     )
     args = parser.parse_args()
-    main(args.trace_route_file)
+    asyncio.run(main(args.trace_route_file))
