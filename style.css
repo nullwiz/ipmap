@@ -1,0 +1,107 @@
+/* ipmap: a nautical chart at night. Deep-water blue, a signal-amber route,
+   magenta for any location that physics rules out. Giant condensed type names each stop. */
+:root {
+  --ocean: #0d2433;
+  --land: #17394b;
+  --land-edge: #2d5b70;
+  --rule: #234659;
+  --ink: #e8f2f3;
+  --muted: #8fb2c0;
+  --signal: #ffb547;
+  --wrong: #ff5fa2;
+  --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --mono: "Geist Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--ocean); color: var(--ink); font: 400 15px/1.6 var(--mono); }
+a { color: var(--ink); text-underline-offset: 4px; text-decoration-color: var(--land-edge); }
+a:hover { text-decoration-color: var(--signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+code { font: 500 14px var(--mono); color: var(--signal); }
+[hidden] { display: none !important; }
+
+.top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 22px max(16px, 4vw); position: relative; z-index: 3;
+}
+.wordmark { font: 900 28px/1 var(--display); text-decoration: none; letter-spacing: .01em; }
+
+/* intake: the question, huge, then the paste box */
+.intake { padding: 4vh max(16px, 4vw) 12vh; max-width: 1200px; }
+.intake h1 {
+  font: 900 clamp(3.2rem, 7.4vw, 7rem)/.86 var(--display); text-transform: uppercase;
+  margin: 0 0 28px; max-width: 13ch; letter-spacing: -.005em;
+}
+.lede { max-width: 60ch; color: var(--muted); margin: 0 0 32px; font-size: 16px; }
+.intake-form { display: grid; gap: 12px; max-width: 760px; }
+.intake-form label { color: var(--muted); }
+textarea {
+  font: 400 14px/1.55 var(--mono); color: var(--ink); background: rgba(0, 0, 0, .18);
+  border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; width: 100%; resize: vertical;
+}
+textarea::placeholder { color: #4f7486; }
+textarea:focus-visible { outline: none; border-color: var(--signal); }
+.hint { color: var(--muted); margin: 0; font-size: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+button {
+  font: 500 15px var(--mono); color: var(--ink); background: transparent; cursor: pointer;
+  border: 1px solid var(--land-edge); border-radius: 4px; padding: 11px 18px;
+}
+button:hover { border-color: var(--ink); }
+button.primary { background: var(--signal); border-color: var(--signal); color: #1a1406; }
+button.primary:hover { filter: brightness(1.08); }
+button:disabled { opacity: .5; cursor: progress; }
+.error { color: var(--wrong); margin: 4px 0 0; }
+.fine { color: #5f8596; font-size: 13px; max-width: 64ch; margin-top: 48px; }
+
+/* result: globe pinned on the left, one full-height stop per hop on the right */
+.result { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); border-top: 1px solid var(--rule); }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; display: grid; place-items: center; }
+#globe { width: min(92%, 88vh); aspect-ratio: 1; cursor: grab; touch-action: none; }
+#globe:active { cursor: grabbing; }
+.stage-note { position: absolute; left: max(16px, 4vw); bottom: 20px; margin: 0; color: #5f8596; font-size: 13px; max-width: 46ch; }
+
+.hops { list-style: none; margin: 0; padding: 0 max(16px, 4vw) 30vh 0; }
+.hop {
+  min-height: 78vh; display: grid; align-content: center; gap: 14px;
+  border-top: 1px solid var(--rule); padding: 48px 0;
+}
+.hop:first-child { border-top: 0; }
+.hop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; color: var(--muted); }
+.hop-rtt { font: 700 clamp(2rem, 3.6vw, 3rem)/1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.hop-rtt small { font: 400 15px var(--mono); color: var(--muted); margin-left: 4px; }
+.hop-place {
+  font: 900 clamp(3.2rem, 8vw, 7.5rem)/.86 var(--display); text-transform: uppercase; margin: 0;
+  overflow-wrap: anywhere; transition: color .3s;
+}
+.hop.is-active .hop-place { color: var(--signal); }
+.hop.impossible .hop-place { color: var(--wrong); text-decoration: line-through; text-decoration-thickness: .07em; }
+.hop.pending .hop-place { color: var(--land-edge); }
+.hop-addr { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+.hop-addr b { color: var(--ink); font-weight: 500; }
+
+/* light meter: how far light gets in this RTT vs how far the claimed location is */
+.meter { position: relative; height: 10px; background: rgba(255, 255, 255, .05); border-radius: 2px; margin-top: 10px; }
+.meter .reach { position: absolute; inset: 0 auto 0 0; width: var(--reach); background: var(--signal); border-radius: 2px; opacity: .85; }
+.meter .dist { position: absolute; top: -6px; bottom: -6px; left: var(--dist); width: 2px; background: var(--ink); }
+.hop.impossible .meter .dist { background: var(--wrong); }
+.meter-key { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 13px; }
+.verdict { margin: 6px 0 0; max-width: 52ch; }
+.hop.impossible .verdict { color: var(--wrong); }
+
+/* hops that don't need a whole screen: your own network, and runs of timeouts */
+.hop.quiet { min-height: 0; padding: 28px 0; gap: 4px; }
+.hop.quiet .hop-place { font-size: clamp(1.8rem, 3.4vw, 2.6rem); color: var(--muted); }
+
+@media (max-width: 900px) {
+  .result { grid-template-columns: minmax(0, 1fr); }
+  .stage { height: 48vh; height: 48svh; z-index: 2; background: var(--ocean); border-bottom: 1px solid var(--rule); }
+  #globe { width: min(92%, 44vh); }
+  .stage-note { display: none; }
+  .hops { padding: 0 16px 20vh; }
+  .hop { min-height: 60vh; }
+}
+@media (prefers-reduced-motion: reduce) { .hop-place { transition: none; } }

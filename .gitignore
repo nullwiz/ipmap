@@ -1,0 +1,5 @@
+ipmap-*.html
+__pycache__/
+*.egg-info/
+.venv/
+build/

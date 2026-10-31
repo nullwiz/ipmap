@@ -1,0 +1,17 @@
+[project]
+name = "ipmap"
+version = "1.0.0"
+description = "See where your packets go: traceroute on a globe, with a speed-of-light check on every hop's location."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["plotly>=5"]
+
+[project.scripts]
+ipmap = "ipmap:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["ipmap"]

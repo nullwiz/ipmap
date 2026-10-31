@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ipmap: where did your packets go?</title>
+  <meta name="description" content="Paste a traceroute and follow every hop on a globe, with a speed-of-light check on where each router claims to be. Runs in your browser." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Geist+Mono:wght@400;500&display=swap" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2715%27 fill=%27%230d2433%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%276%27 fill=%27%23ffb547%27/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="wordmark" href="./">ipmap</a>
+    <a href="https://github.com/nullwiz/ipmap">Source</a>
+  </header>
+
+  <main>
+    <section class="intake" aria-labelledby="title">
+      <h1 id="title">Where did your packets go?</h1>
+      <p class="lede">
+        Paste a traceroute and follow every hop around the globe. Each router's claimed location is checked
+        against the speed of light, because a reply can't come from farther away than light travels in that time.
+      </p>
+
+      <form id="intake" class="intake-form">
+        <label for="trace">Traceroute output</label>
+        <textarea id="trace" name="trace" rows="9" spellcheck="false" autocomplete="off"
+          placeholder="traceroute to google.com (142.251.133.46), 30 hops max, 60 byte packets&#10; 1  192.168.0.1 (192.168.0.1)  2.851 ms  1.817 ms  3.251 ms&#10; 2  * * *&#10; 3  72.14.194.198 (72.14.194.198)  21.074 ms  21.010 ms"></textarea>
+        <p class="hint">
+          Run <code>traceroute google.com</code> on macOS or Linux, or <code>tracert google.com</code> on Windows,
+          then paste everything it prints.
+        </p>
+        <div class="actions">
+          <button type="submit" class="primary">Map the route</button>
+          <button type="button" id="example">Load an example</button>
+        </div>
+        <p id="error" class="error" role="alert" hidden></p>
+      </form>
+
+      <p class="fine">
+        Runs entirely in your browser. To find locations, public hop addresses (and your own address, as the
+        starting point) are looked up at ipwho.is, or ipapi.is if that's unavailable.
+      </p>
+    </section>
+
+    <section id="result" class="result" hidden aria-label="Route">
+      <div class="stage">
+        <canvas id="globe" aria-label="Globe showing the route" role="img"></canvas>
+        <p class="stage-note" id="origin-note"></p>
+      </div>
+      <ol id="hops" class="hops"></ol>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
